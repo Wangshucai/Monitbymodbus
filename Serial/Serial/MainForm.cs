@@ -11,9 +11,12 @@ using System.Threading;
 
 namespace Serial
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
-        public Form1()
+        public int SHOW = 0;
+        private DataFlowForm dataflowform;
+
+        public MainForm()
         {
             InitializeComponent();
             GetPcSeriesInit();
@@ -196,13 +199,18 @@ namespace Serial
                     Serial.Read(buff, 0, length);
 
                     str = HexToString(buff);
-                    Invoke(new MethodInvoker(
-                                () =>
-                                {
-                                    textBox1.AppendText(DateTime.Now.ToString("[RX_HH:mm:ss] ") + str + "\r\n");
-                                    textBox1.ForeColor = Color.DarkBlue;                             
-                                }));
-                
+
+                    if (SHOW == 1)
+                    {
+                        Invoke(new MethodInvoker(
+                                                      () =>
+                                                      {
+                                                          dataflowform.textBox1.AppendText(DateTime.Now.ToString("[RX_HH:mm:ss] ") + str + "\r\n");
+                                                          dataflowform.textBox1.ForeColor = Color.DarkBlue;
+                                                      }));
+                    }
+
+                              
                 }
 
             }
@@ -252,6 +260,21 @@ namespace Serial
             {
                 e.Cancel = true;
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            DataFlowForm dataflowset = new DataFlowForm(this);
+
+            dataflowform = dataflowset;
+            dataflowform.Text = "通信数据流";
+            dataflowform.Show();
+            SHOW = 1;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
 
         //************************以上为串口部分*********************************************************
