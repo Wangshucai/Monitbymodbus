@@ -1,0 +1,8 @@
+E:\桌面\串口实验\Serial\Serial\bin\Release\Serial.exe
+E:\桌面\串口实验\Serial\Serial\bin\Release\Serial.pdb
+E:\桌面\串口实验\Serial\Serial\obj\Release\Serial.Form1.resources
+E:\桌面\串口实验\Serial\Serial\obj\Release\Serial.Properties.Resources.resources
+E:\桌面\串口实验\Serial\Serial\obj\Release\Serial.csproj.GenerateResource.Cache
+E:\桌面\串口实验\Serial\Serial\obj\Release\Serial.csproj.CoreCompileInputs.cache
+E:\桌面\串口实验\Serial\Serial\obj\Release\Serial.exe
+E:\桌面\串口实验\Serial\Serial\obj\Release\Serial.pdb
