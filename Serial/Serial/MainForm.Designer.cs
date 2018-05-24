@@ -30,6 +30,8 @@
         {
             this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -52,6 +54,8 @@
             // groupBox1
             // 
             this.groupBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Controls.Add(this.textBox1);
             this.groupBox1.Controls.Add(this.button3);
             this.groupBox1.Controls.Add(this.button2);
             this.groupBox1.Controls.Add(this.panel1);
@@ -65,14 +69,32 @@
             this.groupBox1.Controls.Add(this.comboBox_PortName);
             this.groupBox1.Location = new System.Drawing.Point(12, 13);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(943, 66);
+            this.groupBox1.Size = new System.Drawing.Size(1093, 66);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "设置";
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(584, 27);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(53, 12);
+            this.label2.TabIndex = 12;
+            this.label2.Text = "通讯周期";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(643, 23);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(68, 21);
+            this.textBox1.TabIndex = 11;
+            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(874, 22);
+            this.button3.Location = new System.Drawing.Point(1030, 22);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(43, 23);
             this.button3.TabIndex = 10;
@@ -81,7 +103,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(807, 22);
+            this.button2.Location = new System.Drawing.Point(963, 22);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(49, 23);
             this.button2.TabIndex = 9;
@@ -94,7 +116,7 @@
             this.panel1.Controls.Add(this.radioButton3);
             this.panel1.Controls.Add(this.radioButton2);
             this.panel1.Controls.Add(this.radioButton1);
-            this.panel1.Location = new System.Drawing.Point(590, 20);
+            this.panel1.Location = new System.Drawing.Point(746, 20);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(202, 28);
             this.panel1.TabIndex = 8;
@@ -161,6 +183,7 @@
             // 
             // comboBox_DataBits
             // 
+            this.comboBox_DataBits.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_DataBits.FormattingEnabled = true;
             this.comboBox_DataBits.Items.AddRange(new object[] {
             "8",
@@ -175,6 +198,7 @@
             // 
             // comboBox_StopBits
             // 
+            this.comboBox_StopBits.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_StopBits.FormattingEnabled = true;
             this.comboBox_StopBits.Items.AddRange(new object[] {
             "None",
@@ -188,6 +212,7 @@
             // 
             // comboBox_Parity
             // 
+            this.comboBox_Parity.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_Parity.FormattingEnabled = true;
             this.comboBox_Parity.Items.AddRange(new object[] {
             "None",
@@ -202,6 +227,7 @@
             // 
             // comboBox_BaudRate
             // 
+            this.comboBox_BaudRate.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_BaudRate.FormattingEnabled = true;
             this.comboBox_BaudRate.Items.AddRange(new object[] {
             "600",
@@ -226,6 +252,7 @@
             // 
             // comboBox_PortName
             // 
+            this.comboBox_PortName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_PortName.FormattingEnabled = true;
             this.comboBox_PortName.Location = new System.Drawing.Point(37, 24);
             this.comboBox_PortName.Name = "comboBox_PortName";
@@ -240,7 +267,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(967, 370);
+            this.ClientSize = new System.Drawing.Size(1107, 370);
             this.Controls.Add(this.groupBox1);
             this.Name = "MainForm";
             this.Text = "Form1";
@@ -272,6 +299,8 @@
         private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
 

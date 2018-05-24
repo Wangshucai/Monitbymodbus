@@ -14,6 +14,7 @@ namespace Serial
     public partial class MainForm : Form
     {
         public int SHOW = 0;
+        public int NowMode = 0;
         private DataFlowForm dataflowform;
 
         public MainForm()
@@ -143,6 +144,7 @@ namespace Serial
             comboBox_DataBits.Enabled = Set;
             comboBox_Parity.Enabled = Set;
             comboBox_StopBits.Enabled = Set;
+            textBox1.Enabled = Set;
             textBox2.Enabled = Set;
             radioButton1.Enabled = Set;
             radioButton2.Enabled = Set;
@@ -192,6 +194,8 @@ namespace Serial
             string str;
             try
             {
+               // System.Threading.Thread.Sleep(150);
+
                 while (Serial.IsOpen && Serial.BytesToRead > 0)
                 {
                     int length = Serial.BytesToRead;
@@ -237,8 +241,26 @@ namespace Serial
             {
                 try
                 {
+                    if (radioButton1.Checked)
+                    {
+                        NowMode = 1;
+                    }
+                    else if (radioButton2.Checked)
+                    {
+                        NowMode = 2;
+                    }
+                    else if (radioButton3.Checked)
+                    {
+                        NowMode = 3;
+                    }
+                    else
+                    {
+                        NowMode = 0;
+                    }
+
                     if (OpenPort())
                     {
+
                         ComboxEnableSet(false);
                         button1.Text = "关闭串口";
                         MessageBox.Show("串口打开成功");
@@ -273,6 +295,13 @@ namespace Serial
         }
 
         private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+       
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
         {
 
         }
