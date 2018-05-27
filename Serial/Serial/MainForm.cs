@@ -16,12 +16,117 @@ namespace Serial
         public int SHOW = 0;
         public int NowMode = 0;
         private DataFlowForm dataflowform;
+        public CQueue BuffQueue = new CQueue();
+        Modbus modbus = new Modbus();
+
+
+        public List<byte> DataBuff = new List<byte>();
+        public int DataBuffCrt = 0;
+
 
         public MainForm()
         {
             InitializeComponent();
             GetPcSeriesInit();
+
         }
+
+
+
+
+
+        private void Series_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+           
+            try
+            {
+                while (Serial.IsOpen && Serial.BytesToRead > 0)
+                {
+                    int length = Serial.BytesToRead;
+                    byte[] buff = new byte[length];
+                    Serial.Read(buff, 0, length);
+
+                    for (int i = 0;i < length;i ++)
+                    {
+                        BuffQueue.EnQueue(buff[i]);
+                    }
+                  
+         
+                }
+
+            }
+            catch { }
+
+        }
+
+        public void ReadBuff()
+        {
+            string readdata;
+        
+            byte data;
+            ushort Local_CHKSUM;
+            while (true)
+            {
+                Thread.Sleep(1);
+
+                if (BuffQueue.QueueCount != 0)
+                {
+                    if (DataBuffCrt < 8)
+                    {
+                        data = (byte)BuffQueue.DeQueue();
+                        DataBuff.Insert(DataBuffCrt, data);
+                        DataBuffCrt++;
+                    }
+                    else
+                    {
+                        modbus.checksum = modbus.Crc16(DataBuff, 0, (ushort)(DataBuffCrt - 3));
+                        Local_CHKSUM = (ushort)(modbus.TwoToWord(DataBuff[DataBuffCrt - 1], DataBuff[DataBuffCrt - 2]));
+
+                        if (DataBuffCrt > 100)
+                        {
+                            DataBuffCrt = 0;
+                            DataBuff.Clear();
+                        }
+
+                        if (modbus.checksum == Local_CHKSUM)
+                        {
+                            byte[] showdata = new byte[DataBuffCrt];
+
+                            for (int num = 0;num < DataBuffCrt;num ++)
+                            {
+                                showdata[num] = DataBuff[num];
+                            }
+
+                            readdata = HexToString(showdata);
+
+                            Invoke(new MethodInvoker(
+                                                             () =>
+                                                             {
+                                                                 textBox3.AppendText(DateTime.Now.ToString("[RX_HH:mm:ss] ") + readdata + "\r\n");
+                                                                 textBox3.ForeColor = Color.DarkBlue;
+                                                             }));
+
+                            DataBuff.Clear();
+                            DataBuffCrt = 0;
+
+                        }
+                        else
+                        {
+                            data = (byte)BuffQueue.DeQueue();
+                            DataBuff.Insert(DataBuffCrt, data);
+                            DataBuffCrt++;
+                        }
+
+                    }
+
+
+                }
+
+            }
+           
+
+        }
+
 
       
 
@@ -187,40 +292,17 @@ namespace Serial
             Thread thread = new Thread(new ThreadStart(() => { Serial.DataReceived += new SerialDataReceivedEventHandler(Series_DataReceived); }), 0);
             thread.IsBackground = true;
             thread.Start();
+
+
+            ThreadStart ReadThread = new ThreadStart(ReadBuff);
+            Thread Read = new Thread(ReadThread);
+            Read.IsBackground = true;
+            Read.Start();
+
+
         }
         //串口接收
-        private void Series_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            string str;
-            try
-            {
-               // System.Threading.Thread.Sleep(150);
-
-                while (Serial.IsOpen && Serial.BytesToRead > 0)
-                {
-                    int length = Serial.BytesToRead;
-                    byte[] buff = new byte[length];
-                    Serial.Read(buff, 0, length);
-
-                    str = HexToString(buff);
-
-                    if (SHOW == 1)
-                    {
-                        Invoke(new MethodInvoker(
-                                                      () =>
-                                                      {
-                                                          dataflowform.textBox1.AppendText(DateTime.Now.ToString("[RX_HH:mm:ss] ") + str + "\r\n");
-                                                          dataflowform.textBox1.ForeColor = Color.DarkBlue;
-                                                      }));
-                    }
-
-                              
-                }
-
-            }
-            catch{}
-           
-        }
+    
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -264,6 +346,8 @@ namespace Serial
                         ComboxEnableSet(false);
                         button1.Text = "关闭串口";
                         MessageBox.Show("串口打开成功");
+
+                       
                     }
                 }
                 catch { }

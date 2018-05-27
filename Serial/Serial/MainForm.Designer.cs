@@ -47,6 +47,7 @@
             this.comboBox_BaudRate = new System.Windows.Forms.ComboBox();
             this.comboBox_PortName = new System.Windows.Forms.ComboBox();
             this.Serial = new System.IO.Ports.SerialPort(this.components);
+            this.textBox3 = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -263,11 +264,24 @@
             // 
             this.Serial.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.Series_DataReceived);
             // 
+            // textBox3
+            // 
+            this.textBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox3.Location = new System.Drawing.Point(12, 92);
+            this.textBox3.Multiline = true;
+            this.textBox3.Name = "textBox3";
+            this.textBox3.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox3.Size = new System.Drawing.Size(1012, 375);
+            this.textBox3.TabIndex = 4;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1107, 370);
+            this.ClientSize = new System.Drawing.Size(1107, 479);
+            this.Controls.Add(this.textBox3);
             this.Controls.Add(this.groupBox1);
             this.Name = "MainForm";
             this.Text = "Form1";
@@ -278,6 +292,7 @@
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -301,6 +316,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBox1;
+        public System.Windows.Forms.TextBox textBox3;
     }
 }
 

@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Clist.cs" />
+    <Compile Include="CQueue.cs" />
     <Compile Include="DataFlowForm.cs">
       <SubType>Form</SubType>
     </Compile>
