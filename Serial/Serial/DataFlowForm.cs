@@ -25,6 +25,7 @@ namespace Serial
             // 这里写关闭窗体要执行的代码
             frmMain.SHOW = 0;
             //frmMain.Childflag = 0;
+          
             base.OnClosing(e);
         }
 

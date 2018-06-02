@@ -13,12 +13,13 @@ namespace Serial
 {
     public partial class MainForm : Form
     {
+        public byte MailAddr = 0x40;  //默认通信地址1，可在串口设置界面更改
         public int SHOW = 0;
         public int NowMode = 0;
         private DataFlowForm dataflowform;
         public CQueue BuffQueue = new CQueue();
         Modbus modbus = new Modbus();
-
+        public static MainForm pMainWin = null;
 
         public List<byte> DataBuff = new List<byte>();
         public int DataBuffCrt = 0;
@@ -26,103 +27,245 @@ namespace Serial
 
         public MainForm()
         {
+
+            this.StartPosition = FormStartPosition.CenterScreen;
+            pMainWin = this;
             InitializeComponent();
             GetPcSeriesInit();
+            Configconfiguration();
 
+        }
+
+
+        public void Configconfiguration()
+        {
+            System.Windows.Forms.TabPage tab = new System.Windows.Forms.TabPage();
+            tab = config;
+
+            System.Windows.Forms.TabPage tabPage = new System.Windows.Forms.TabPage()
+            {
+                Text = "显示"
+            };
+            GroupBox  Config = new System.Windows.Forms.GroupBox();
+            Config.Width = 1085;
+            Config.Height = 520;
+            Config.BackColor = Color.LightCyan;
+            tabPage.Controls.Add(Config);
+
+            DataGridView dataGridView = new DataGridView();
+
+            tabPage.Controls.Add(dataGridView);
+            this.tabControl1.Controls.Remove(config);
+            this.tabControl1.Controls.Add(tabPage);
+            this.tabControl1.Controls.Add(tab);
         }
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+        private static object objlock = new object();
+        private static Mutex mutex = new Mutex();
+        //串口接收数据，全部读取后解析
         private void Series_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-           
-            try
+
+           // lock (objlock)
             {
-                while (Serial.IsOpen && Serial.BytesToRead > 0)
+                try
                 {
-                    int length = Serial.BytesToRead;
-                    byte[] buff = new byte[length];
-                    Serial.Read(buff, 0, length);
-
-                    for (int i = 0;i < length;i ++)
+                    while (Serial.IsOpen && Serial.BytesToRead > 0)
                     {
-                        BuffQueue.EnQueue(buff[i]);
-                    }
-                  
-         
-                }
+                        int length = Serial.BytesToRead;
+                        byte[] buff = new byte[length];
+                        Serial.Read(buff, 0, length);
 
+                        for (int i = 0; i < length; i++)
+                        {
+                            mutex.WaitOne();
+
+                            BuffQueue.EnQueue(buff[i]);
+
+                            mutex.ReleaseMutex();
+
+                        }
+                        ;
+                    }
+
+                }
+                catch { }
             }
-            catch { }
+
+
+
+        
 
         }
-
+        //解析和校验串口数据
         public void ReadBuff()
         {
-            string readdata;
-        
-            byte data;
-            ushort Local_CHKSUM;
-            while (true)
+
+            try
             {
-                Thread.Sleep(1);
-
-                if (BuffQueue.QueueCount != 0)
+                string readdata = "";
+                UInt64 EERCount = 0;
+                byte data = 0;
+                ushort Local_CHKSUM = 0;
+                int queuecount = 0;
+                while (true)
                 {
-                    if (DataBuffCrt < 8)
+                    Thread.Sleep(1);
+
+                    mutex.WaitOne();
+
+                    queuecount = BuffQueue.QueueCount;
+
+                    mutex.ReleaseMutex();
+
+                    if (queuecount > 0)
                     {
-                        data = (byte)BuffQueue.DeQueue();
-                        DataBuff.Insert(DataBuffCrt, data);
-                        DataBuffCrt++;
-                    }
-                    else
-                    {
-                        modbus.checksum = modbus.Crc16(DataBuff, 0, (ushort)(DataBuffCrt - 3));
-                        Local_CHKSUM = (ushort)(modbus.TwoToWord(DataBuff[DataBuffCrt - 1], DataBuff[DataBuffCrt - 2]));
-
-                        if (DataBuffCrt > 100)
+                        if (DataBuffCrt < 7)
                         {
-                            DataBuffCrt = 0;
-                            DataBuff.Clear();
-                        }
+                            mutex.WaitOne();
+                            data = (byte)BuffQueue.DeQueue();
+                            mutex.ReleaseMutex();
 
-                        if (modbus.checksum == Local_CHKSUM)
-                        {
-                            byte[] showdata = new byte[DataBuffCrt];
 
-                            for (int num = 0;num < DataBuffCrt;num ++)
+                            if (data != 2147483647)
                             {
-                                showdata[num] = DataBuff[num];
+                                DataBuff.Insert(DataBuffCrt, data);
+                                DataBuffCrt++;
                             }
-
-                            readdata = HexToString(showdata);
-
-                            Invoke(new MethodInvoker(
-                                                             () =>
-                                                             {
-                                                                 textBox3.AppendText(DateTime.Now.ToString("[RX_HH:mm:ss] ") + readdata + "\r\n");
-                                                                 textBox3.ForeColor = Color.DarkBlue;
-                                                             }));
-
-                            DataBuff.Clear();
-                            DataBuffCrt = 0;
-
+                           
                         }
                         else
                         {
-                            data = (byte)BuffQueue.DeQueue();
-                            DataBuff.Insert(DataBuffCrt, data);
-                            DataBuffCrt++;
+                            modbus.checksum = modbus.Crc16(DataBuff, 0, (ushort)(DataBuffCrt - 3));
+                            Local_CHKSUM = (ushort)(modbus.TwoToWord(DataBuff[DataBuffCrt - 1], DataBuff[DataBuffCrt - 2]));
+
+                            if (DataBuffCrt > 100)
+                            {
+                                if (data == MailAddr)
+                                {
+                                    DataBuffCrt = 0;
+                                    DataBuff.Clear();
+                                    DataBuff.Insert(DataBuffCrt, data);
+                                    DataBuffCrt++;
+                                }
+   
+                            }
+
+                            if (modbus.checksum == Local_CHKSUM)
+                            {
+                                try
+                                {
+                                    EERCount++;
+                                    
+                                    byte[] showdata = new byte[DataBuffCrt];
+
+                                    for (int num = 0; num < DataBuffCrt; num++)
+                                    {
+                                        showdata[num] = DataBuff[num];
+                                    }
+
+                                    readdata = HexToString(showdata);
+
+                                    DataBuff.Clear();
+                                    DataBuffCrt = 0;
+
+
+                                    try
+                                        {
+
+                                            Invoke(new MethodInvoker(
+                                                                    () =>
+                                                                    {
+                                                                        label3.Text = EERCount.ToString();
+                                                                        label4.Text = queuecount.ToString();
+                                                                        if (SHOW == 1)
+                                                                        {
+                                                                            dataflowform.textBox1.Font = new System.Drawing.Font("宋体", 14);
+                                                                            dataflowform.textBox1.AppendText(DateTime.Now.ToString("[RX_HH:mm:ss] ") + readdata + "\r\n");
+                                                                            dataflowform.textBox1.ForeColor = Color.DarkBlue;
+                                                                        }
+                                                                    }));
+                                        }
+                                        catch
+                                        {
+
+
+                                        }
+
+
+
+
+
+                                   
+
+                                }
+                                catch
+                                {
+
+                                }
+
+
+
+
+
+
+                            }
+                            else
+                            {
+                                mutex.WaitOne();
+                                data = (byte)BuffQueue.DeQueue();
+                                mutex.ReleaseMutex();
+
+                                if (data != 2147483647)
+                                {
+                                    DataBuff.Insert(DataBuffCrt, data);
+                                    DataBuffCrt++;
+                                }
+                               
+                            }
+
                         }
 
-                    }
 
+                    }
 
                 }
 
             }
+            catch {
+
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          
            
 
         }
@@ -374,18 +517,51 @@ namespace Serial
 
             dataflowform = dataflowset;
             dataflowform.Text = "通信数据流";
-            dataflowform.Show();
             SHOW = 1;
+            dataflowform.Show();
+           
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            timer1.Start();
         }
 
        
 
         private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void config_Click(object sender, EventArgs e)
+        {
+
+        }
+        static int flag = 0;
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+          
+            DateTimePicker NowTime = new DateTimePicker();
+
+            NowTime.Format = DateTimePickerFormat.Long;
+            NowTime.Format = DateTimePickerFormat.Time;
+            label5.Text = NowTime.Value.ToString();
+            if (flag == 0)
+            {
+                flag = 1;
+                int index = dataGridView1.Rows.Add();
+                dataGridView1.Rows[index].Cells[0].Value = NowTime.Value.ToString();
+            }
+            else
+            {
+                dataGridView1.Rows[0].Cells[0].Value = NowTime.Value.ToString();
+            }
+         
+
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
         }
