@@ -354,13 +354,169 @@ namespace Serial
 
         public void MonDataAnalysis(string request, string respond)
         {
+            LinkList.Current = LinkList.Head;
+            short ShowNum = 0;
+            short Count = 3;
             byte[] Request = new byte[request.Length / 3];
             byte[] Respond = new byte[respond.Length / 3];
             StringToHex(request, Request);
             StringToHex(respond, Respond);
 
+            if (Request[1] == 01)
+            {
+                int addr = modbus.TwoToWord(Request[2], Request[3]);
+
+                for (int num = 0; num < LinkList.ListNodeCount; num++)
+                {
+                    if (LinkList.Current.MonReadFunc == Request[1] && (addr >= LinkList.Current.FirstAddr && addr <= LinkList.Current.LastAddr))
+                    {
+                        byte NumData = Respond[2];
+                        byte[] Data = new byte[NumData];
+                        for (int i = 0; i < NumData; i++)
+                        {
+                            Data[i] = Respond[Count++];
+                        }
+
+                        for (int j = 0; j < NumData; j++)
+                        {
+                            for (int i = 0; i < 8; i++)
+                            {
+                                if (ShowNum < LinkList.Current.Num)
+                                {
+                                    if (((Data[j] >> i) & 0x01) == 0x01)
+                                    {
+                                        dataGridView1.Rows[LinkList.Current.ViewRows[ShowNum]].Cells[LinkList.Current.ViewCells[ShowNum]].Value = 1;
+                                        LinkList.Current.ReadValue[ShowNum].ForeColor = Color.Red;
+                                        LinkList.Current.ReadValue[ShowNum].Text = (LinkList.Current.ShowMode[ShowNum] == 1) ? "故障" : "开";
+                                    }
+                                    else
+                                    {
+                                        dataGridView1.Rows[LinkList.Current.ViewRows[ShowNum]].Cells[LinkList.Current.ViewCells[ShowNum]].Value = 0;
+                                        LinkList.Current.ReadValue[ShowNum].ForeColor = Color.DarkBlue;
+                                        LinkList.Current.ReadValue[ShowNum].Text = (LinkList.Current.ShowMode[ShowNum] == 1) ? "正常" : "关";
+                                    }
+                                    ShowNum++;
+                                }
+
+                            }
+
+                        }
+
+                    }
+                    LinkList.MoveNext();
+                }
+            }
+
+            else if (Request[1] == 15)
+            {
+                int addr = modbus.TwoToWord(Request[2], Request[3]);
+                for (int num = 0; num < LinkList.ListNodeCount; num++)
+                {
+                    if (LinkList.Current.MonWriteFunc == Request[1] && (addr >= LinkList.Current.FirstAddr && addr <= LinkList.Current.LastAddr && modbus.TwoToWord(Request[4], Request[5]) <= LinkList.Current.Num))
+                    {
+                        byte NumData = Request[6];
+                        Count = 7;
+                        byte[] Data = new byte[NumData];
+                        for (int i = 0; i < NumData; i++)
+                        {
+                            Data[i] = Request[Count++];
+                        }
+
+                        for (int j = 0; j < NumData; j++)
+                        {
+                            for (int i = 0; i < 8; i++)
+                            {
+                                if (ShowNum < LinkList.Current.Num)
+                                {
+                                    if (((Data[j] >> i) & 0x01) == 0x01)
+                                    {
+                                        dataGridView1.Rows[LinkList.Current.ViewRows[ShowNum]].Cells[LinkList.Current.ViewCells[ShowNum]].Value = 1;
+                                        LinkList.Current.ReadValue[ShowNum].ForeColor = Color.Red;
+                                        LinkList.Current.ReadValue[ShowNum].Text = (LinkList.Current.ShowMode[ShowNum] == 1) ? "故障" : "开";
+                                    }
+                                    else
+                                    {
+                                        dataGridView1.Rows[LinkList.Current.ViewRows[ShowNum]].Cells[LinkList.Current.ViewCells[ShowNum]].Value = 0;
+                                        LinkList.Current.ReadValue[ShowNum].ForeColor = Color.DarkBlue;
+                                        LinkList.Current.ReadValue[ShowNum].Text = (LinkList.Current.ShowMode[ShowNum] == 1) ? "正常" : "关";
+                                    }
+                                    ShowNum++;
+                                }
+
+                            }
+
+                        }
+
+                    }
+                    LinkList.MoveNext();
+                }
+            }
+
+            else if (Request[1] == 03)
+            {
+                int addr = modbus.TwoToWord(Request[2], Request[3]);
+                for (int num = 0; num < LinkList.ListNodeCount; num++)
+                {
+                    if (LinkList.Current.MonReadFunc == Request[1] && (addr >= LinkList.Current.FirstAddr && addr <= LinkList.Current.LastAddr))
+                    {
+                        Count = 3;
+                        ShowNum = 0;
+                        short[] Data = new short[Respond[2] / 2];
+                        for (int i = 0; i < LinkList.Current.Num; i++)
+                        {
+                            Data[i] = modbus.TwoToWord(Respond[Count++], Respond[Count++]);
+                        }
 
 
+                        for (ShowNum = 0; ShowNum < LinkList.Current.Num; ShowNum++)
+                        {
+
+                            dataGridView1.Rows[LinkList.Current.ViewRows[ShowNum]].Cells[LinkList.Current.ViewCells[ShowNum]].Value = (float)Data[ShowNum] / LinkList.Current.Precision[ShowNum];
+                            ccontrols.RefreshAnalog(LinkList.Current.ReadValue[ShowNum], Data[ShowNum] * (10 / LinkList.Current.Precision[ShowNum]), LinkList.Current.Unit[ShowNum]);
+
+                        }
+
+
+                    }
+                    else
+                    {
+                        LinkList.MoveNext();
+                    }
+                }
+            }
+
+            else if (Request[1] == 16)
+            {
+                int addr = modbus.TwoToWord(Request[2], Request[3]);
+                for (int num = 0; num < LinkList.ListNodeCount; num++)
+                {
+                    if (LinkList.Current.MonWriteFunc == Request[1] && (addr >= LinkList.Current.FirstAddr && addr <= LinkList.Current.LastAddr) && modbus.TwoToWord(Request[4], Request[5]) <= LinkList.Current.Num)
+                    {
+                        Count = 7;
+                        ShowNum = 0;
+                        short[] Data = new short[Request[6]];
+                        for (int i = 0; i < LinkList.Current.Num; i++)
+                        {
+                            Data[i] = modbus.TwoToWord(Request[Count++], Request[Count++]);
+                        }
+
+
+                        for (ShowNum = 0; ShowNum < LinkList.Current.Num; ShowNum++)
+                        {
+
+                            dataGridView1.Rows[LinkList.Current.ViewRows[ShowNum]].Cells[LinkList.Current.ViewCells[ShowNum]].Value = (float)Data[ShowNum] / LinkList.Current.Precision[ShowNum];
+                            ccontrols.RefreshAnalog(LinkList.Current.ReadValue[ShowNum], Data[ShowNum] * (10 / LinkList.Current.Precision[ShowNum]), LinkList.Current.Unit[ShowNum]);
+
+                        }
+
+
+                    }
+                    else
+                    {
+                        LinkList.MoveNext();
+                    }
+                }
+            }
 
         }
 
