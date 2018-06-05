@@ -28,3 +28,4 @@ G:\串口实验\Serial\Serial\obj\Debug\Serial.csproj.GenerateResource.Cache
 G:\串口实验\Serial\Serial\obj\Debug\Serial.csproj.CoreCompileInputs.cache
 G:\串口实验\Serial\Serial\obj\Debug\Serial.exe
 G:\串口实验\Serial\Serial\obj\Debug\Serial.pdb
+E:\桌面\串口实验\Serial\Serial\obj\Debug\Serial.csproj.ResolveComReference.cache

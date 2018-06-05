@@ -18,3 +18,4 @@ C:\Users\Lenovo152\Desktop\串口实验\Serial\Serial\obj\Release\Serial.csproj.
 C:\Users\Lenovo152\Desktop\串口实验\Serial\Serial\obj\Release\Serial.csproj.CoreCompileInputs.cache
 C:\Users\Lenovo152\Desktop\串口实验\Serial\Serial\obj\Release\Serial.exe
 C:\Users\Lenovo152\Desktop\串口实验\Serial\Serial\obj\Release\Serial.pdb
+E:\桌面\串口实验\Serial\Serial\obj\Release\Serial.csproj.ResolveComReference.cache

@@ -26,7 +26,9 @@ namespace Serial
             frmMain.SHOW = 0;
             //frmMain.Childflag = 0;
           
-            base.OnClosing(e);
+          //  base.OnClosing(e);
+            this.Hide();
+            e.Cancel = true;
         }
 
 
