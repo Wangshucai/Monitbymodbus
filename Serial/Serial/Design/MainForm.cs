@@ -18,7 +18,7 @@ namespace Serial
 {
     public partial class MainForm : Form
     {
-        public byte MailAddr = 0x40;  //默认通信地址1，可在串口设置界面更改
+        public byte MailAddr = 0x60;  //默认通信地址1，可在串口设置界面更改
         public int SHOW = 0;
         public int NowMode = 0;
 
@@ -51,10 +51,7 @@ namespace Serial
             this.StartPosition = FormStartPosition.CenterScreen;
             pMainWin = this;
             InitializeComponent();
-            ConfigRead();
-            GetPcSeriesInit();
-            Configconfiguration();
-            ConfigSet();
+          
 
 
         }
@@ -354,14 +351,20 @@ namespace Serial
 
         public void MonDataAnalysis(string request, string respond)
         {
+            mutex.WaitOne();
             LinkList.Current = LinkList.Head;
+            mutex.ReleaseMutex();
+
+           
             short ShowNum = 0;
             short Count = 3;
+
+           
             byte[] Request = new byte[request.Length / 3];
             byte[] Respond = new byte[respond.Length / 3];
             StringToHex(request, Request);
             StringToHex(respond, Respond);
-
+           
             if (Request[1] == 01)
             {
                 int addr = modbus.TwoToWord(Request[2], Request[3]);
@@ -665,6 +668,7 @@ namespace Serial
                                                  () =>
                                                  {
                                                      MonDataAnalysis(Request, Respond);
+
                                                  }));
                                          
                                         }
@@ -675,11 +679,6 @@ namespace Serial
                                         }
                                     
                                     }
-
-                                   
-
-
-
 
                                     readdata = HexToString(showdata);
 
@@ -914,7 +913,7 @@ namespace Serial
                 radioButton1.Checked = true;
                 radioButton2.Checked = false;
                 radioButton3.Checked = false;
-                textBox2.Text = "1";
+              //  textBox2.Text = "1";
 
 
                 comboBox_BaudRate.Text = "9600";
@@ -948,11 +947,32 @@ namespace Serial
 
 
         }
-        //串口接收
-    
 
+        //获取从机地址，并转换成对应的十六进制数字
+        private byte GetMailAddr(string data)
+        {
+            int ReturnNum = 0;
+            if (data !="")
+            {
+                int[] Num = new int[data.Length];
+                int length = data.Length - 1;
+                for (int n = 0;n < data.Length;n ++)
+                {
+                    Num[n] = Convert.ToByte(data.Substring(n, 1));
+                    Num[n] = Num[n] * (int)Math.Pow(16, length--);
+                    ReturnNum += Num[n];
+                }
+           
+            }
+            return (byte)ReturnNum;
+        }
+
+
+ //串口接收
         private void button1_Click(object sender, EventArgs e)
         {
+            MailAddr = GetMailAddr(textBox2.Text);
+
             if (Serial.IsOpen)
             {
                 try
@@ -1026,6 +1046,13 @@ namespace Serial
 
         private void Form1_Load(object sender, EventArgs e)
         {
+           // textBox2.Text = Convert.ToString(MailAddr, 16).ToUpper();
+
+            ConfigRead();
+            GetPcSeriesInit();
+            Configconfiguration();
+            ConfigSet();
+
             timer1.Start();
             DataFlowForm dataflowset = new DataFlowForm(this);
 
